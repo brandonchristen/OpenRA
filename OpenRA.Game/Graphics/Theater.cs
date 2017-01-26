@@ -47,7 +47,9 @@ namespace OpenRA.Graphics
 			Func<Sheet> allocate = () =>
 			{
 				if (allocated)
+				{
 					throw new SheetOverflowException("Terrain sheet overflow. Try increasing the tileset SheetSize parameter.");
+				}
 				allocated = true;
 
 				return new Sheet(SheetType.Indexed, new Size(tileset.SheetSize, tileset.SheetSize));
@@ -95,7 +97,9 @@ namespace OpenRA.Graphics
 				var allSprites = variants.SelectMany(sheet => sheet);
 				// Ignore the offsets baked into R8 sprites
 				if (tileset.IgnoreTileSpriteOffsets)
-					allSprites = allSprites.Select(sheet => new Sprite(sheet.Sheet, sheet.Bounds, sheet.ZRamp, new float3(float2.Zero, sheet.Offset.Z), sheet.Channel, sheet.BlendMode));
+				{
+					allSprites = allSprites.Select(sheet => new Sprite(sheet.Sheet, sheet.Bounds, sheet.ZRamp, new float3(float2.Zero, sheet.Offset.Z), sheet.Channel, sheet.BlendMode));	
+				}
 
 				templates.Add(t.Value.Id, new TheaterTemplate(allSprites.ToArray(), variants.First().Count(), t.Value.Images.Length));
 			}
@@ -110,11 +114,13 @@ namespace OpenRA.Graphics
 		{
 			TheaterTemplate template;
 			if (!templates.TryGetValue(r.Type, out template))
+			{
 				return missingTile;
-
+			}
 			if (r.Index >= template.Stride)
+			{
 				return missingTile;
-
+			}
 			var start = template.Variants > 1 ? variant.HasValue ? variant.Value : random.Next(template.Variants) : 0;
 			return template.Sprites[start * template.Stride + r.Index];
 		}
@@ -133,8 +139,9 @@ namespace OpenRA.Graphics
 
 					// Empty tile
 					if (tileInfo == null)
+					{
 						continue;
-
+					}
 					var sprite = TileSprite(tile);
 					var u = mapGrid == MapGridType.Rectangular ? x : (x - y) / 2f;
 					var v = mapGrid == MapGridType.Rectangular ? y : (x + y) / 2f;
