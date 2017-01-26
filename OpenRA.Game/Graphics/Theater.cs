@@ -75,28 +75,27 @@ namespace OpenRA.Graphics
 						var zOffset = tile != null ? -tile.ZOffset : 0;
 						var zRamp = tile != null ? tile.ZRamp : 1f;
 						var offset = new float3(f.Offset, zOffset);
-						var s = sheetBuilder.Allocate(f.Size, zRamp, offset);
-						Util.FastCopyIntoChannel(s, f.Data);
+						var sheet = sheetBuilder.Allocate(f.Size, zRamp, offset);
+						Util.FastCopyIntoChannel(sheet, f.Data);
 
 						if (tileset.EnableDepth)
 						{
-							var ss = sheetBuilder.Allocate(f.Size, zRamp, offset);
-							Util.FastCopyIntoChannel(ss, allFrames[j + frameCount].Data);
+							var otherSheet = sheetBuilder.Allocate(f.Size, zRamp, offset);
+							Util.FastCopyIntoChannel(otherSheet, allFrames[j + frameCount].Data);
 
 							// s and ss are guaranteed to use the same sheet
 							// because of the custom terrain sheet allocation
-							s = new SpriteWithSecondaryData(s, ss.Bounds, ss.Channel);
+							sheet = new SpriteWithSecondaryData(sheet, otherSheet.Bounds, otherSheet.Channel);
 						}
 
-						return s;
+						return sheet;
 					}).ToArray());
 				}
 
-				var allSprites = variants.SelectMany(s => s);
-
+				var allSprites = variants.SelectMany(sheet => sheet);
 				// Ignore the offsets baked into R8 sprites
 				if (tileset.IgnoreTileSpriteOffsets)
-					allSprites = allSprites.Select(s => new Sprite(s.Sheet, s.Bounds, s.ZRamp, new float3(float2.Zero, s.Offset.Z), s.Channel, s.BlendMode));
+					allSprites = allSprites.Select(sheet => new Sprite(sheet.Sheet, sheet.Bounds, sheet.ZRamp, new float3(float2.Zero, sheet.Offset.Z), sheet.Channel, sheet.BlendMode));
 
 				templates.Add(t.Value.Id, new TheaterTemplate(allSprites.ToArray(), variants.First().Count(), t.Value.Images.Length));
 			}
