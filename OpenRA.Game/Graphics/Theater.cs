@@ -114,7 +114,7 @@ namespace OpenRA.Graphics
 		{
 			TheaterTemplate template;
 			if (!templates.TryGetValue(r.Type, out template))
-			{
+			
 				return missingTile;
 			}
 			if (r.Index >= template.Stride)
